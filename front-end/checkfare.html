@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MRT Fare Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    input, select {
+      font-size: 1.2rem;
+    }
+
+    /* Terms & Conditions auto scroll */
+    #termsContainer {
+      overflow: hidden;
+      position: relative;
+    }
+
+    #termsSlider {
+      display: flex;
+      gap: 1.5rem;
+      min-width: max-content;
+      animation: scroll-left 30s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-cyan-100 to-blue-200 min-h-screen flex flex-col items-center py-12 px-4">
+
+  <h1 class="text-5xl font-bold mb-8 text-blue-900">MRT Fare Calculator</h1>
+
+  <a href="/front-end/dashbroad.html" class="mb-6 text-blue-700 font-semibold hover:underline text-lg">
+    <i class="fas fa-arrow-left mr-2"></i>Go Back to Dashboard
+  </a>
+
+  <!-- Fare Calculator Form -->
+  <form onsubmit="calculateFare(event)" class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-4xl text-lg space-y-6">
+    <div>
+      <label class="block mb-2 font-semibold text-gray-800">Pickup Station</label>
+      <select id="pickup" required class="w-full p-4 border rounded-xl">
+        <option value="">Select pickup</option>
+      </select>
+    </div>
+    <div>
+      <label class="block mb-2 font-semibold text-gray-800">Drop-off Station</label>
+      <select id="dropoff" required class="w-full p-4 border rounded-xl">
+        <option value="">Select drop-off</option>
+      </select>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="rapidPass" class="w-5 h-5" />
+      <label for="rapidPass" class="font-medium text-gray-700">I have a Rapid Pass (MRT Pass)</label>
+    </div>
+    
+    <div id="fareResult" class="text-2xl font-bold text-center text-green-700 mt-4 p-4 min-h-[3rem] whitespace-normal"></div>
+  </form>
+
+  <!-- Terms & Conditions Section -->
+  <section class="my-16 text-center bg-gradient-to-r from-blue-200 to-purple-400 py-12">
+    <h2 class="text-4xl font-extrabold text-white mb-8">Terms & Conditions</h2>
+    <div id="termsContainer" class="relative w-full max-w-6xl mx-auto px-4">
+      <div id="termsSlider">
+        <div class="min-w-[300px] bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:scale-105 transition-transform">
+          <i class="fas fa-ruler-horizontal text-blue-600 text-6xl mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">Per Kilometer Rate</h3>
+          <p class="text-gray-700">Fare is calculated at Tk 5.0 per kilometer.</p>
+        </div>
+
+        <div class="min-w-[300px] bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:scale-105 transition-transform">
+          <i class="fas fa-money-bill-wave text-green-600 text-6xl mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">Minimum Fare</h3>
+          <p class="text-gray-700">Minimum fare is Tk 20, even for short distances.</p>
+        </div>
+
+       
+    <div class="min-w-[300px] bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:scale-105 transition-transform">
+          <i class="fas fa-id-card text-pink-600 text-6xl mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">MRT Pass Discount</h3>
+          <p class="text-gray-700">Rapid Pass holders get 10% discount on fares.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const stations = [
+      "Uttara North", "Uttara Center", "Uttara South", "Pallabi", "Mirpur-11", "Mirpur-10",
+      "Kazipara", "Shewrapara", "Agargaon", "Bijoy Sarani", "Farmgate", "Karwan Bazar",
+      "Shahbagh", "Dhaka University", "Bangladesh Secretariat", "Motijheel"
+    ];
+    const distances = [
+      1.1, 1.2, 1.3, 1.0, 1.1, 1.0, 1.0, 1.2, 1.5, 1.0, 0.9, 1.0, 0.8, 1.1, 1.2
+    ];
+
+    const pickupSelect = document.getElementById('pickup');
+    const dropoffSelect = document.getElementById('dropoff');
+    const rapidPassCheckbox = document.getElementById('rapidPass');
+
+    // Populate pickup & dropoff dropdowns
+    stations.forEach(station => {
+      const option1 = document.createElement('option');
+      const option2 = document.createElement('option');
+      option1.value = option1.textContent = station;
+      option2.value = option2.textContent = station;
+      pickupSelect.appendChild(option1);
+      dropoffSelect.appendChild(option2);
+    });
+
+    function calculateFare(e) {
+      if (e) e.preventDefault();
+
+      const pickup = pickupSelect.value;
+      const dropoff = dropoffSelect.value;
+      const hasPass = rapidPassCheckbox.checked;
+
+      const fromIndex = stations.indexOf(pickup);
+      const toIndex = stations.indexOf(dropoff);
+
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+        document.getElementById('fareResult').textContent = "Invalid station selection.";
+        return;
+      }
+
+      const start = Math.min(fromIndex, toIndex);
+      const end = Math.max(fromIndex, toIndex);
+let distance = 0;
+for (let i = start; i < end; i++) {
+  distance += distances[i];
+}
+
+// Base fare calculation
+let fare = 0;
+if (distance <= 2) {
+  fare = 20;
+} else {
+  fare = 20 + (distance - 2) * 5;
+}
+
+// Apply 10% discount if MRT pass
+let finalFare = fare;
+let discounted = false;
+if (hasPass) {
+  finalFare *= 0.9;
+  discounted = true;
+}
+
+// Round to nearest integer (not nearest 10)
+finalFare = Math.round(finalFare / 10) * 10;
+
+document.getElementById('fareResult').textContent =
+  `Estimated Fare: Tk ${finalFare} (Distance: ${distance.toFixed(1)} km)${discounted ? ' - 10% Rapid Pass discount applied' : ''}`;
+
+    }
+
+    // Auto-calculate fare on input changes
+    [pickupSelect, dropoffSelect, rapidPassCheckbox].forEach(input =>
+      input.addEventListener('change', () => {
+        if (pickupSelect.value && dropoffSelect.value && pickupSelect.value !== dropoffSelect.value) {
+          calculateFare();
+        } else {
+          document.getElementById('fareResult').textContent = '';
+        }
+      })
+    );
+
+    // Duplicate terms for seamless infinite scroll
+    window.addEventListener('load', () => {
+      const slider = document.getElementById('termsSlider');
+      slider.innerHTML += slider.innerHTML;
+    });
+  </script>
+</body>
+</html>

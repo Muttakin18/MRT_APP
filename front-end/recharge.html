@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recharge Balance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-white via-green-100 to-white min-h-screen flex flex-col items-center py-12 px-4">
+
+  <h1 class="text-4xl font-bold text-[#006a4e] mb-10">Recharge Your Balance</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-4xl">
+
+    <!-- bKash -->
+    <button onclick="payNow('bKash')" class="bg-white border-2 border-pink-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center text-center">
+      <img src="https://seeklogo.com/images/B/bkash-logo-0F93AFD4C1-seeklogo.com.png" alt="bKash" class="w-20 h-20 object-contain mb-4">
+      <p class="text-xl font-semibold text-pink-600">bKash</p>
+    </button>
+
+    <!-- Nagad -->
+    <button onclick="payNow('Nagad')" class="bg-white border-2 border-red-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center text-center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Nagad_Logo.svg/1024px-Nagad_Logo.svg.png" alt="Nagad" class="w-20 h-20 object-contain mb-4">
+      <p class="text-xl font-semibold text-red-600">Nagad</p>
+    </button>
+
+    <!-- Rocket -->
+    <button onclick="payNow('Rocket')" class="bg-white border-2 border-purple-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center text-center">
+      <img src="https://play-lh.googleusercontent.com/a1_TPgLSt7mSEm8RfjWjNH4CHCLq93Okx_MFNB9G2h9x7MiHKmyA4zGO1VmA9qdnHg" alt="Rocket" class="w-20 h-20 object-contain mb-4">
+      <p class="text-xl font-semibold text-purple-600">Rocket</p>
+    </button>
+
+    <!-- Bank ATM -->
+    <button onclick="payNow('ATM')" class="bg-white border-2 border-green-600 rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center text-center">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135696.png" alt="ATM" class="w-20 h-20 object-contain mb-4">
+      <p class="text-xl font-semibold text-green-700">Bank ATM</p>
+    </button>
+
+  </div>
+
+  <script>
+    function payNow(method) {
+      fetch("http://localhost:3000/initiate-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ amount: 50, method }) // Example recharge
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.GatewayPageURL) {
+          window.open(data.GatewayPageURL, "_blank");
+        } else {
+          alert("Payment init failed!");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
